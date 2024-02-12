@@ -43,36 +43,111 @@
     </section>
 
     <section id="chats-section" class="hidden relative">
-        <div class="flex h-screen lg:p-6">
-            <div
-                class="basis-[100px] lg:h-full w-full bg-white lg:rounded-2xl rounded-none lg:static absolute bottom-0 ">
-                <div class="flex flex-col justify-between h-full items-center py-6">
+        <div class="flex h-screen lg:p-6 gap-x-6 w-full">
+            <div class="lg:basis-[150px] w-full bg-white rounded-none 
+                lg:h-full lg:rounded-2xl lg:static absolute bottom-0">
+                <div class="flex flex-col justify-between h-full items-center lg:py-6 py-4">
                     <div class="cursor-pointer lg:flex hidden">
-                        <img src="/assets/images/icons/logo.svg" alt="loho" class="w-10 h-10">
+                        <img src="/assets/images/icons/logo.svg" alt="logo" class="w-6 h-6 lg:w-10 lg:h-10">
                     </div>
-
-                    <div class="flex lg:flex-col flex-row gap-y-12 justify-between w-full lg:w-auto px-6">
-                        <div
-                            class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2 active-side-menu-item">
-                            <img src="/assets/images/icons/chats.svg" alt="chats" class="w-10 h-10">
+                    <div class="flex lg:flex-col flex-row gap-y-12 justify-between w-full lg:w-auto lg:px-2 px-6">
+                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2"
+                            onclick="_route('/chats')" id="router-link-chats">
+                            <img src="/assets/images/icons/chats.svg" alt="chats" class="w-6 h-6 lg:w-10 lg:h-10">
                         </div>
-                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2">
-                            <img src="/assets/images/icons/email.svg" alt="emails" class="w-10 h-10">
+                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2"
+                            onclick="_route('/mails')" id="router-link-mails">
+                            <img src="/assets/images/icons/email.svg" alt="emails" class="w-6 h-6 lg:w-10 lg:h-10">
                         </div>
-                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2 ">
-                            <img src="/assets/images/icons/more.svg" alt="more" class="w-10 h-10">
+                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2 "
+                            onclick="_route('/settings')" id="router-link-settings">
+                            <img src="/assets/images/icons/more.svg" alt="more" class="w-6 h-6 lg:w-10 lg:h-10">
                         </div>
-                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2">
-                            <img src="/assets/images/icons/settings.svg" alt="settings" class="w-10 h-10">
+                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2"
+                            onclick="_route('/more')" id="router-link-more">
+                            <img src="/assets/images/icons/settings.svg" alt="settings" class="w-6 h-6 lg:w-10 lg:h-10">
                         </div>
                     </div>
                     <div>
-                        <div class="cursor-pointer lg:flex hidden transform transition-transform hover:scale-150">
-                            <img src="/assets/images/icons/logout.svg" alt="logout" class="w-10 h-10">
+                        <div class="cursor-pointer lg:flex hidden transform transition-transform hover:scale-150"
+                            onclick="_logout()">
+                            <img src="/assets/images/icons/logout.svg" alt="logout" class="w-6 h-6 lg:w-10 lg:h-10">
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="lg:basis-[650px] w-full bg-white lg:m-0 m-2 mb-20 rounded-xl p-2">
+                <div class="m-3 flex justify-between items-center">
+                    <div class="flex gap-x-4 items-center">
+                        <div class="min-w-12 min-h-12 bg-purple-700 rounded-full relative flex 
+                        justify-center items-center text-2xl text-white uppercase">
+                            T
+                            <div class="w-4 h-4 rounded-full bg-green-500 absolute bottom-0 right-0 cursor-pointer">
+                            </div>
+                        </div>
+                        <div class="w-full">
+                            <p class="flex justify-between font-medium items-center text-xl">
+                                TriHox
+                            </p>
+                            <p class="text-sm">
+                                Online
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="">Show</label>
+                        <select name="" id="" class="focus:outline-none">
+                            <option value="chats">Chats</option>
+                            <option value="members">Members</option>
+                        </select>
+                    </div>
+
+                </div>
+                <hr class="my-3">
+                <div class="relative mb-3">
+                    <!-- Search Input -->
+                    <input type="text" placeholder="Search..." class="w-full py-2 pl-10 pr-3 border rounded-lg" />
+
+                    <!-- Search Icon -->
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg width="20px" height="20px" viewBox="0 0 24 24" class="opacity-50" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"
+                                fill="#0D0D0D" />
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <div id="global-chats" class="flex items-center bg-gray-100 gap-x-3 w-full
+                      rounded-2xl px-5 py-3 cursor-pointer user-chat-item" onclick="_onChatSelection('global-chats')">
+                        <div class="w-10 h-10 bg-purple-700 rounded-full 
+                        relative flex justify-center items-center text-xl text-white">
+                            G
+                            <div class="w-3 h-3 rounded-full bg-green-500 absolute bottom-0 right-0">
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-medium">
+                                #global-chats
+                            </p>
+                            <p class="text-sm">
+                                all member chats
+                            </p>
+                        </div>
+                    </div>
+                    <hr class="my-2 hidden">
+                    <div id="user-chat-list" class="flex flex-col gap-y-3">
+                        <!-- content loads dynamically -->
+                    </div>
+                </div>
+
+            </div>
+            <div class="w-full bg-white lg:m-0 m-6 rounded-xl p-2 lg:flex hidden">
+                hello
+            </div>
+
         </div>
 
     </section>

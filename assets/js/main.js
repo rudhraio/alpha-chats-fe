@@ -44,26 +44,58 @@ async function _joinChat() {
     }
 }
 
+function _route(to) {
+    console.log("Called me");
+    window.location.hash = to;
+    _renderPage();
+}
+
+function _logout() {
+    localStorage.clear();
+    username = "";
+    _renderPage();
+}
+
 // render the page 
 async function _renderPage() {
     var hash = window.location.hash.substring(1);
-
-    console.log("hash", hash);
 
     WelcomeSection.style.display = "none";
     ChatsSection.style.display = "none";
 
     if (hash.includes("/chats") && username) {
         ChatsSection.style.display = "inherit";
+        _activeSideMenuItem("chats");
+    } else if (hash.includes("/mails") && username) {
+        window.location.hash = "/mails";
+        ChatsSection.style.display = "inherit";
+        _activeSideMenuItem("mails");
+    } else if (hash.includes("/settings") && username) {
+        window.location.hash = "/settings";
+        ChatsSection.style.display = "inherit";
+        _activeSideMenuItem("settings");
+    } else if (hash.includes("/more") && username) {
+        window.location.hash = "/more";
+        ChatsSection.style.display = "inherit";
+        _activeSideMenuItem("more");
     } else if (username) {
         window.location.hash = "/chats";
         ChatsSection.style.display = "inherit";
+        _activeSideMenuItem("chats");
     } else {
         window.location.hash = "";
         WelcomeSection.style.display = "inherit";
     }
 }
 _renderPage();
+
+function _activeSideMenuItem(item) {
+    console.log("Item", document.getElementsByClassName("side-menu-item"));
+    document.querySelectorAll(".side-menu-item").forEach(element => {
+        element.classList.remove('active-side-menu-item');
+    });
+    document.getElementById("router-link-" + item).classList.add("active-side-menu-item");
+}
 
 /** ############################
  * ------Helper Functions------
