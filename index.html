@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatAlpha | Talk to Stangers</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway">
+
+
+    <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+
+</head>
+
+<body>
+    <section id="welcome-section" class="hidden">
+        <div class="flex h-screen items-end sm:items-start">
+            <div class="my-36 flex w-full justify-center px-6">
+                <div class="sm:w-auto w-full">
+                    <div>
+                        <h2 class="text-2xl font-semibold sm:text-4xl text-white">
+                            Welcome to AlphaChats
+                        </h2>
+                        <p class="text-md mt-2 sm:text-lg text-white">
+                            A place where you can chat with random users
+                        </p>
+                    </div>
+                    <div class="mt-6 w-full sm:mt-12 sm:w-[30rem]">
+                        <input type="text" id="input-box-username" class="w-full rounded-lg border p-3 text-xl"
+                            placeholder="Enter username" oninput="validateUsername(this)" />
+                        <button id="join-chat"
+                            class="mt-4 w-full rounded-md bg-black p-3 font-bold text-white shadow-xl"
+                            onclick="_joinChat()">
+                            Join Chat
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="chats-section" class="hidden relative">
+        <div class="flex h-screen lg:p-6">
+            <div
+                class="basis-[100px] lg:h-full w-full bg-white lg:rounded-2xl rounded-none lg:static absolute bottom-0 ">
+                <div class="flex flex-col justify-between h-full items-center py-6">
+                    <div class="cursor-pointer lg:flex hidden">
+                        <img src="/assets/images/icons/logo.svg" alt="loho" class="w-10 h-10">
+                    </div>
+
+                    <div class="flex lg:flex-col flex-row gap-y-12 justify-between w-full lg:w-auto px-6">
+                        <div
+                            class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2 active-side-menu-item">
+                            <img src="/assets/images/icons/chats.svg" alt="chats" class="w-10 h-10">
+                        </div>
+                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2">
+                            <img src="/assets/images/icons/email.svg" alt="emails" class="w-10 h-10">
+                        </div>
+                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2 ">
+                            <img src="/assets/images/icons/more.svg" alt="more" class="w-10 h-10">
+                        </div>
+                        <div class="cursor-pointer side-menu-item transform transition-transform hover:scale-150 p-2">
+                            <img src="/assets/images/icons/settings.svg" alt="settings" class="w-10 h-10">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="cursor-pointer lg:flex hidden transform transition-transform hover:scale-150">
+                            <img src="/assets/images/icons/logout.svg" alt="logout" class="w-10 h-10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <script src="/assets/js/main.js"></script>
+
+
+</body>
+
+</html>
