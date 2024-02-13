@@ -6,7 +6,15 @@ console.log("Welcome to Alpha Chats Space");
  * ############################ */
 
 const WelcomeSection = document.getElementById("welcome-section");
+const UserSection = document.getElementById("user-section");
+
+
 const ChatsSection = document.getElementById("chats-section");
+const MailsSection = document.getElementById("mails-section");
+const MoreSection = document.getElementById("more-section");
+const SettingsSection = document.getElementById("settings-section");
+
+
 
 
 
@@ -61,26 +69,26 @@ async function _renderPage() {
     var hash = window.location.hash.substring(1);
 
     WelcomeSection.style.display = "none";
-    ChatsSection.style.display = "none";
+    UserSection.style.display = "none";
 
     if (hash.includes("/chats") && username) {
-        ChatsSection.style.display = "inherit";
+        UserSection.style.display = "inherit";
         _activeSideMenuItem("chats");
     } else if (hash.includes("/mails") && username) {
         window.location.hash = "/mails";
-        ChatsSection.style.display = "inherit";
+        UserSection.style.display = "inherit";
         _activeSideMenuItem("mails");
     } else if (hash.includes("/settings") && username) {
         window.location.hash = "/settings";
-        ChatsSection.style.display = "inherit";
+        UserSection.style.display = "inherit";
         _activeSideMenuItem("settings");
     } else if (hash.includes("/more") && username) {
         window.location.hash = "/more";
-        ChatsSection.style.display = "inherit";
+        UserSection.style.display = "inherit";
         _activeSideMenuItem("more");
     } else if (username) {
         window.location.hash = "/chats";
-        ChatsSection.style.display = "inherit";
+        UserSection.style.display = "inherit";
         _activeSideMenuItem("chats");
     } else {
         window.location.hash = "";
@@ -90,10 +98,14 @@ async function _renderPage() {
 _renderPage();
 
 function _activeSideMenuItem(item) {
-    console.log("Item", document.getElementsByClassName("side-menu-item"));
     document.querySelectorAll(".side-menu-item").forEach(element => {
         element.classList.remove('active-side-menu-item');
     });
+    document.querySelectorAll(".menu-sections").forEach(element => {
+        element.classList.add("hidden");
+    })
+    document.getElementById(item + "-section").classList.remove("hidden");
+
     document.getElementById("router-link-" + item).classList.add("active-side-menu-item");
 }
 
