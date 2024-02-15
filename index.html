@@ -77,11 +77,11 @@
                 </div>
             </div>
             <div id="chats-section" class="flex w-full gap-x-6 menu-sections hidden">
-                <div class="lg:basis-[650px] w-full bg-white lg:m-0 m-2 mb-20 rounded-xl p-2">
+                <div class="lg:basis-[650px] flex flex-col w-full h-full bg-white lg:m-0 m-2 mb-20 rounded-xl p-2">
                     <div class="m-3 flex justify-between items-center">
                         <div class="flex gap-x-4 items-center">
                             <div class="min-w-12 min-h-12 bg-purple-700 rounded-full relative flex 
-                        justify-center items-center text-2xl text-white uppercase">
+                            justify-center items-center text-2xl text-white uppercase">
                                 T
                                 <div class="w-4 h-4 rounded-full bg-green-500 absolute bottom-0 right-0 cursor-pointer">
                                 </div>
@@ -95,18 +95,17 @@
                                 </p>
                             </div>
                         </div>
-
                         <div>
-                            <select name="" id="" class="focus:outline-none w-28">
+                            <select name="channel" id="channel-selection" class="focus:outline-none w-28"
+                                onchange="_onChannelSelection(this)">
                                 <option value="chats">My Chats</option>
                                 <option value="chats">Groups</option>
-
                                 <option value="members">Members</option>
                             </select>
                         </div>
-
                     </div>
                     <hr class="my-3">
+
                     <div class="relative mb-3">
                         <!-- Search Input -->
                         <input type="text" placeholder="Search..." class="w-full py-2 pl-10 pr-3 border rounded-lg" />
@@ -121,11 +120,13 @@
                             </svg>
                         </div>
                     </div>
-                    <div>
-                        <div id="global-chats" class="flex items-center bg-gray-100 gap-x-3 w-full
-                      rounded-2xl px-5 py-3 cursor-pointer user-chat-item" onclick="_onChatSelection('global-chats')">
+
+                    <div class="h-full overflow-y-scroll">
+                        <!-- <div id="global-chats" class="flex items-center bg-gray-100 gap-x-3 w-full
+                            rounded-2xl px-5 py-3 cursor-pointer user-chat-item"
+                            onclick="_onChatSelection('global-chats')">
                             <div class="w-10 h-10 bg-purple-700 rounded-full 
-                        relative flex justify-center items-center text-xl text-white">
+                                relative flex justify-center items-center text-xl text-white">
                                 G
                                 <div class="w-3 h-3 rounded-full bg-green-500 absolute bottom-0 right-0">
                                 </div>
@@ -139,15 +140,48 @@
                                 </p>
                             </div>
                         </div>
-                        <hr class="my-2 hidden">
+                        <hr class="my-2 hidden"> -->
                         <div id="user-chat-list" class="flex flex-col gap-y-3">
                             <!-- content loads dynamically -->
                         </div>
                     </div>
 
                 </div>
-                <div class="w-full bg-white lg:m-0 m-6 rounded-xl p-2 lg:flex hidden">
-                    hello
+                <div class="w-full bg-white lg:m-0 m-6 rounded-xl p-2 lg:flex gap-y-3 flex-col hidden">
+                    <div id="selected-user-title-card"
+                        class="flex items-center bg-gray-100 gap-x-3 w-full rounded-2xl px-5 py-3 cursor-pointer">
+                        <div class="min-w-12 min-h-12 bg-yellow-700 rounded-full 
+                          relative flex justify-center items-center text-2xl text-white">
+                            N
+                            <div class="w-4 h-4 rounded-full bg-gray-500 absolute bottom-0 right-0 cursor-pointer">
+                            </div>
+                        </div>
+                        <div class="w-full">
+                            <p class="flex justify-between font-medium items-center text-xl">
+                                #no-user-selected
+                            </p>
+                            <p class="text-sm mt-1">
+                                .....
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center bg-gray-100 gap-x-3 w-full h-full 
+                        rounded-2xl px-5 py-3 overflow-y-auto">
+                        <div id="selected-user-conversation" class="flex justify-end flex-col h-full gap-y-6 ">
+                            No Messages
+                        </div>
+                    </div>
+                    <div class="flex items-center bg-gray-100 gap-x-3 w-full rounded-2xl px-5 py-3">
+                        <div class="w-full">
+                            <div class="flex flex-row gap-x-3 items-center">
+                                <textarea id="message-box" type="text"
+                                    class="font-light px-3 py-2 border w-full rounded-lg" rows="1"
+                                    placeholder="Message"></textarea>
+                                <button class="py-2 px-4 bg-black text-white rounded-lg"
+                                    onclick="_sendMessage()">Send</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="mails-section" class="flex w-full gap-x-6 menu-sections hidden">

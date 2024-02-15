@@ -14,22 +14,26 @@ const MailsSection = document.getElementById("mails-section");
 const MoreSection = document.getElementById("more-section");
 const SettingsSection = document.getElementById("settings-section");
 
-
-
+const UserChatItems = document.getElementById("user-chat-list");
+const SelectedUserTitleCard = document.getElementById("selected-user-title-card");
+const SelectedUserConversation = document.getElementById("selected-user-conversation");
 
 
 const UsernameInputBox = document.getElementById("input-box-username");
+const MessageBox = document.getElementById("message-box");
 
 
 /** ############################
  * ----------Varaiables---------
  * ############################ */
 const APIURL = "https://api.alphaspace.in";
+const SOCKETURL = "wss://socket.alphaspace.in";
 
 
 let username = localStorage.getItem("username");
 let userinfo = JSON.parse(localStorage.getItem("userinfo")) || {};
-
+let memberslist = [], chatsList = [];
+let socket, selectedOption = "chats", selectedItem = "", selectedItemData = {};
 
 // helps in making user join the chat
 async function _joinChat() {
@@ -60,6 +64,7 @@ function _route(to) {
 
 function _logout() {
     localStorage.clear();
+    socket.close();
     username = "";
     _renderPage();
 }
@@ -74,6 +79,7 @@ async function _renderPage() {
     if (hash.includes("/chats") && username) {
         UserSection.style.display = "inherit";
         _activeSideMenuItem("chats");
+        _renderMyChatMessages();
     } else if (hash.includes("/mails") && username) {
         window.location.hash = "/mails";
         UserSection.style.display = "inherit";
@@ -90,9 +96,14 @@ async function _renderPage() {
         window.location.hash = "/chats";
         UserSection.style.display = "inherit";
         _activeSideMenuItem("chats");
+        _renderMyChatMessages();
     } else {
         window.location.hash = "";
         WelcomeSection.style.display = "inherit";
+    }
+
+    if (localStorage.getItem("access")) {
+        _conectToSocket();
     }
 }
 _renderPage();
@@ -108,6 +119,230 @@ function _activeSideMenuItem(item) {
 
     document.getElementById("router-link-" + item).classList.add("active-side-menu-item");
 }
+
+
+function _conectToSocket() {
+    socket = new WebSocket(`${SOCKETURL}/?token=${localStorage.getItem("access")}`);
+
+
+    socket.onopen = function (event) {
+        console.log('WebSocket connection opened.');
+    };
+
+    // Event handler function for when a message is received
+    socket.onmessage = function (event) {
+        console.log('Message from server:', event.data);
+    };
+
+    // Event handler function for when the WebSocket connection is closed
+    socket.onclose = function (event) {
+        console.log('WebSocket connection closed.');
+    };
+}
+
+async function _onChannelSelection(event) {
+    selectedOption = event.value;
+    selectedItem = "";
+    window.location.hash = `/chats/?selectedOption=${selectedOption}`;
+
+    if (event.value === "members") {
+        _renderMemberList();
+    } else if (event.value === "chats") {
+        _renderMyChatMessages();
+    }
+
+
+}
+
+async function _renderMemberList() {
+    const tempItems = await _getMembersList();
+    let tempInnerHtml = "";
+    tempItems.forEach((item) => {
+        tempInnerHtml += _memberHtmlComponent(item);
+    });
+    UserChatItems.innerHTML = tempInnerHtml;
+}
+
+async function _renderMyChatMessages() {
+    const tempItems = await _getChatsList();
+    let tempInnerHtml = "";
+    tempItems.forEach((item) => {
+        tempInnerHtml += _chatItemHtmlComponent(item);
+    });
+    UserChatItems.innerHTML = tempInnerHtml;
+}
+
+async function _getMembersList() {
+    const { data } = await apiHandler("/api/v1/members/get", "get");
+    memberslist = data;
+    return memberslist;
+}
+
+
+async function _getChatsList() {
+    const { data } = await apiHandler("/api/v1/chats/get", "get");
+    chatsList = data;
+    return chatsList;
+}
+
+
+async function _onChatSelection(id) {
+    console.log("Id", id);
+    window.location.hash = `/chats/?selectedOption=${selectedOption}&selectedItem=${id}`;
+
+    selectedItem = id;
+
+    document.querySelectorAll(".user-chat-item").forEach((item) => {
+        item.classList.remove("bg-gray-500", "text-white");
+        item.classList.add("bg-gray-100", "text-black")
+    });
+    const tempComponent = document.getElementById(`user-${id}`);
+
+    tempComponent.classList.add("bg-gray-500", "text-white")
+    tempComponent.classList.remove("bg-gray-100", "text-black");
+
+
+    console.log("selectedOption", selectedOption);
+
+    if (selectedOption === "members") {
+        selectedItemData = memberslist.filter((item) => { return item.id === id })[0];
+    } else if (selectedOption === "chats") {
+        const tempdata = chatsList.filter((item) => { return item.userslist.includes(id) })[0];
+        console.log(tempdata);
+        selectedItemData = tempdata.usersdetails.filter((item) => { return item.username !== username })[0];
+    }
+
+
+    SelectedUserTitleCard.innerHTML = _selectedUserTitleComponent(selectedItemData);
+
+
+
+    _renderChatMessages(id);
+}
+
+
+async function _renderChatMessages(id) {
+    const data = await _getMessagesByUserId(id);
+
+    console.log("Data message", data);
+
+    let conversationInnerhtml = "";
+    data.messages.forEach((item) => {
+        conversationInnerhtml += _userMessageComponent(item, data.usersdetails)
+    });
+
+    SelectedUserConversation.innerHTML = conversationInnerhtml;
+}
+
+
+async function _getMessagesByUserId(id) {
+    const { data } = await apiHandler(`api/v1/chats/get/?userid=${id}`, "get");
+    return data;
+}
+
+async function _sendMessage() {
+    const message = MessageBox.value;
+
+    const { data } = await apiHandler("api/v1/chats/post", "post", { message, to: selectedItem });
+    _renderChatMessages(selectedItem);
+
+    MessageBox.value = "";
+
+}
+
+
+function _memberHtmlComponent(data) {
+    const { id, username, status } = data;
+
+    return `<div id="user-${id}" class="flex items-center bg-gray-100 gap-x-3 w-full
+        rounded-2xl px-5 py-3 cursor-pointer user-chat-item" onclick="_onChatSelection('${id}')">
+        <div class="w-10 h-10 bg-[${uuidToHexColor(id)}] rounded-full 
+            relative flex justify-center items-center text-xl text-white uppercase">
+            ${username[0]}
+            <div class="w-3 h-3 rounded-full bg-green-500 absolute bottom-0 right-0">
+            </div>
+        </div>
+        <div>
+            <p class="font-bold">
+                #${username}
+            </p>
+            <p class="text-sm">
+                ${status}
+            </p>
+        </div>
+    </div>`
+}
+
+
+function _chatItemHtmlComponent(data) {
+
+
+    const user = data?.usersdetails?.filter((item) => { return item.username !== username })[0];
+
+    return `<div id="user-${user?.id}" class="flex items-center bg-gray-100 gap-x-3 w-full
+        rounded-2xl px-5 py-3 cursor-pointer user-chat-item" onclick="_onChatSelection('${user?.id}')">
+        <div class="w-10 h-10 bg-[${uuidToHexColor(user?.id)}] rounded-full 
+            relative flex justify-center items-center text-xl text-white uppercase">
+            ${user?.username[0]}
+            <div class="w-3 h-3 rounded-full bg-green-500 absolute bottom-0 right-0">
+            </div>
+        </div>
+        <div>
+            <p class="font-bold">
+                #${user?.username}
+            </p>
+            <p class="text-sm">
+                ${user?.status}
+            </p>
+        </div>
+    </div>`
+}
+
+function _selectedUserTitleComponent(data) {
+
+
+    const { id, username, status } = data;
+    console.log(data);
+    return `<div class="min-w-12 min-h-12 bg-[${uuidToHexColor(id)}] rounded-full 
+                relative flex justify-center items-center text-2xl uppercase text-white">
+                ${username[0]}
+                <div class="w-4 h-4 rounded-full bg-green-500 absolute bottom-0 right-0 cursor-pointer">
+                </div>
+            </div>
+            <div class="w-full">
+                <p class="flex justify-between font-medium items-center text-xl">
+                    #${username}
+                </p>
+                <p class="text-sm mt-1 capitalize">
+                    ${status}
+                </p>
+            </div>`;
+}
+
+function _userMessageComponent(data, usersdetails) {
+    const { from, message, createdat, id, mtype } = data
+    const fromDetails = usersdetails.filter((item) => { return item.id === from })[0];
+    return `<div class="flex items-start gap-x-3">
+                <div class="min-w-8 min-h-8 bg-cyan-700 rounded-full 
+                    relative flex justify-center items-center text-white">
+                    ${fromDetails.username[0]}
+                    <div class="rounded-full bg-green-500 absolute bottom-0 right-0 cursor-pointer">
+                    </div>
+                </div>
+                <div>
+                    <p class="text-lg flex gap-x-3 items-center">
+                        ${fromDetails.username} 
+                        <span class="text-xs font-light text-bg-300 mt-1">
+                            ${new Date(createdat).toLocaleTimeString()}
+                        </span>
+                    </p>
+                    <p class="max-w-[30rem] mt-1 text-base font-light">
+                        ${message}
+                    </p>
+                </div>
+            </div>`
+}
+
 
 /** ############################
  * ------Helper Functions------
@@ -157,4 +392,14 @@ async function apiHandler(path, method, payload) {
         console.error('Error during API request:', error.message);
         throw new Error('Error during API request');
     }
+}
+
+function uuidToHexColor(uuid = "dd1a715f-106a-476e-9e32-10a7306a0fc0") {
+    // Remove hyphens from UUID and convert it to lowercase
+    const cleanUUID = uuid.replace(/-/g, '').toLowerCase();
+
+    // Take the first 6 characters of the UUID and convert it to a hexadecimal color
+    const hexColor = '#' + cleanUUID.substring(0, 6);
+
+    return hexColor;
 }
