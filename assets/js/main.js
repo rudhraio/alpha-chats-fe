@@ -29,8 +29,8 @@ const MessageBox = document.getElementById("message-box");
 /** ############################
  * ----------Varaiables---------
  * ############################ */
-// const APIURL = "https://api.alphaspace.in";
-const APIURL = "http://localhost:3200";
+const APIURL = "https://api.alphaspace.in";
+// const APIURL = "http://localhost:3200";
 const SOCKETURL = "wss://socket.alphaspace.in";
 
 
