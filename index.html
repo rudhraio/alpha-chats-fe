@@ -79,16 +79,16 @@
             <div id="chats-section" class="flex w-full gap-x-6 menu-sections hidden">
                 <div class="lg:basis-[650px] flex flex-col w-full h-full bg-white lg:m-0 m-2 mb-20 rounded-xl p-2">
                     <div class="m-3 flex justify-between items-center">
-                        <div class="flex gap-x-4 items-center">
+                        <div id="logged-user-card" class="flex gap-x-4 items-center">
                             <div class="min-w-12 min-h-12 bg-purple-700 rounded-full relative flex 
                             justify-center items-center text-2xl text-white uppercase">
-                                T
+                                N
                                 <div class="w-4 h-4 rounded-full bg-green-500 absolute bottom-0 right-0 cursor-pointer">
                                 </div>
                             </div>
                             <div class="w-full">
                                 <p class="flex justify-between font-medium items-center text-xl">
-                                    TriHox
+                                    NoUser
                                 </p>
                                 <p class="text-sm">
                                     Online
@@ -99,7 +99,6 @@
                             <select name="channel" id="channel-selection" class="focus:outline-none w-28"
                                 onchange="_onChannelSelection(this)">
                                 <option value="chats">My Chats</option>
-                                <option value="chats">Groups</option>
                                 <option value="members">Members</option>
                             </select>
                         </div>
@@ -165,8 +164,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="flex items-center bg-gray-100 gap-x-3 w-full h-full 
-                        rounded-2xl px-5 py-3 overflow-y-auto">
+                    <div class="flex flex-col-reverse bg-white gap-x-3 w-full h-full rounded-2xl px-5 py-3 overflow-y-auto">
                         <div id="selected-user-conversation" class="flex justify-end flex-col h-full gap-y-6 ">
                             No Messages
                         </div>

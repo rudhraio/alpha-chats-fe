@@ -17,16 +17,20 @@ const SettingsSection = document.getElementById("settings-section");
 const UserChatItems = document.getElementById("user-chat-list");
 const SelectedUserTitleCard = document.getElementById("selected-user-title-card");
 const SelectedUserConversation = document.getElementById("selected-user-conversation");
+const LoggedUserCard = document.getElementById("logged-user-card");
 
 
 const UsernameInputBox = document.getElementById("input-box-username");
 const MessageBox = document.getElementById("message-box");
 
 
+
+
 /** ############################
  * ----------Varaiables---------
  * ############################ */
-const APIURL = "https://api.alphaspace.in";
+// const APIURL = "https://api.alphaspace.in";
+const APIURL = "http://localhost:3200";
 const SOCKETURL = "wss://socket.alphaspace.in";
 
 
@@ -34,6 +38,10 @@ let username = localStorage.getItem("username");
 let userinfo = JSON.parse(localStorage.getItem("userinfo")) || {};
 let memberslist = [], chatsList = [];
 let socket, selectedOption = "chats", selectedItem = "", selectedItemData = {};
+
+if (userinfo) {
+    _renderLoggedUserCard(userinfo);
+}
 
 // helps in making user join the chat
 async function _joinChat() {
@@ -52,6 +60,7 @@ async function _joinChat() {
         delete resp.data.refreshToken;
         userinfo = resp.data;
         setLocalValue("userinfo", JSON.stringify(resp.data));
+        _renderLoggedUserCard(resp.data);
         _renderPage();
     }
 }
@@ -158,7 +167,10 @@ async function _renderMemberList() {
     const tempItems = await _getMembersList();
     let tempInnerHtml = "";
     tempItems.forEach((item) => {
-        tempInnerHtml += _memberHtmlComponent(item);
+        if (item.username !== username) {
+
+            tempInnerHtml += _memberHtmlComponent(item);
+        }
     });
     UserChatItems.innerHTML = tempInnerHtml;
 }
@@ -173,14 +185,14 @@ async function _renderMyChatMessages() {
 }
 
 async function _getMembersList() {
-    const { data } = await apiHandler("/api/v1/members/get", "get");
+    const { data } = await apiHandler("api/v1/members/get", "get");
     memberslist = data;
     return memberslist;
 }
 
 
 async function _getChatsList() {
-    const { data } = await apiHandler("/api/v1/chats/get", "get");
+    const { data } = await apiHandler("api/v1/chats/get", "get");
     chatsList = data;
     return chatsList;
 }
@@ -224,8 +236,6 @@ async function _onChatSelection(id) {
 async function _renderChatMessages(id) {
     const data = await _getMessagesByUserId(id);
 
-    console.log("Data message", data);
-
     let conversationInnerhtml = "";
     data.messages.forEach((item) => {
         conversationInnerhtml += _userMessageComponent(item, data.usersdetails)
@@ -250,16 +260,20 @@ async function _sendMessage() {
 
 }
 
+async function _renderLoggedUserCard(data) {
+    LoggedUserCard.innerHTML = _loggedUserCardComponent(data);
+}
+
 
 function _memberHtmlComponent(data) {
-    const { id, username, status } = data;
+    const { id, username, userstatus } = data;
 
     return `<div id="user-${id}" class="flex items-center bg-gray-100 gap-x-3 w-full
         rounded-2xl px-5 py-3 cursor-pointer user-chat-item" onclick="_onChatSelection('${id}')">
         <div class="w-10 h-10 bg-[${uuidToHexColor(id)}] rounded-full 
             relative flex justify-center items-center text-xl text-white uppercase">
             ${username[0]}
-            <div class="w-3 h-3 rounded-full bg-green-500 absolute bottom-0 right-0">
+            <div class="w-3 h-3 rounded-full ${userstatus === "online" ? "bg-green-500" : "bg-gray-400"} absolute bottom-0 right-0">
             </div>
         </div>
         <div>
@@ -267,7 +281,7 @@ function _memberHtmlComponent(data) {
                 #${username}
             </p>
             <p class="text-sm">
-                ${status}
+                ${userstatus}
             </p>
         </div>
     </div>`
@@ -278,21 +292,32 @@ function _chatItemHtmlComponent(data) {
 
 
     const user = data?.usersdetails?.filter((item) => { return item.username !== username })[0];
+    const loggedinuser = data?.usersdetails?.filter((item) => { return item.username === username })[0];
 
     return `<div id="user-${user?.id}" class="flex items-center bg-gray-100 gap-x-3 w-full
         rounded-2xl px-5 py-3 cursor-pointer user-chat-item" onclick="_onChatSelection('${user?.id}')">
-        <div class="w-10 h-10 bg-[${uuidToHexColor(user?.id)}] rounded-full 
+        <div class="min-w-10 min-h-10 bg-[${uuidToHexColor(user?.id)}] rounded-full 
             relative flex justify-center items-center text-xl text-white uppercase">
             ${user?.username[0]}
-            <div class="w-3 h-3 rounded-full bg-green-500 absolute bottom-0 right-0">
+            <div class="w-3 h-3 rounded-full bg-gray-400 absolute bottom-0 right-0">
             </div>
         </div>
-        <div>
-            <p class="font-bold">
-                #${user?.username}
-            </p>
-            <p class="text-sm">
-                ${user?.status}
+        <div class="w-full">
+            <p class="flex justify-between font-medium items-center">
+                    <span>
+                    #${user?.username}
+                    </span>
+                    <span class="text-xs">
+                        ${new Date(data.createdat).toLocaleTimeString()} - ${new Date(data.createdat).toLocaleDateString()}
+                    </span>
+                </p>
+
+            <p class="text-sm flex justify-between w-full font-medium items-center mt-1">
+                <span>
+                    ${data?.last_message}
+                </span>
+                ${loggedinuser.unread === "true" ? '<span class="flex justify-center items-center rounded-full text-xs bg-black text-white w-3 h-3"></span>' : ''}
+                
             </p>
         </div>
     </div>`
@@ -300,30 +325,30 @@ function _chatItemHtmlComponent(data) {
 
 function _selectedUserTitleComponent(data) {
 
-
-    const { id, username, status } = data;
+    console.log("data", data);
+    const { id, username, userstatus } = data;
     console.log(data);
     return `<div class="min-w-12 min-h-12 bg-[${uuidToHexColor(id)}] rounded-full 
                 relative flex justify-center items-center text-2xl uppercase text-white">
                 ${username[0]}
-                <div class="w-4 h-4 rounded-full bg-green-500 absolute bottom-0 right-0 cursor-pointer">
+                <div class="w-4 h-4 rounded-full ${userstatus === "online" ? "bg-green-500" : "bg-gra-400"} absolute bottom-0 right-0 cursor-pointer">
                 </div>
             </div>
             <div class="w-full">
                 <p class="flex justify-between font-medium items-center text-xl">
                     #${username}
                 </p>
-                <p class="text-sm mt-1 capitalize">
-                    ${status}
-                </p>
+                ${userstatus ? '<p class="text-sm mt-1 capitalize">' + userstatus + '</p>' : ''}
+                
             </div>`;
 }
 
 function _userMessageComponent(data, usersdetails) {
     const { from, message, createdat, id, mtype } = data
     const fromDetails = usersdetails.filter((item) => { return item.id === from })[0];
+    console.log("fromDetails", fromDetails);
     return `<div class="flex items-start gap-x-3">
-                <div class="min-w-8 min-h-8 bg-cyan-700 rounded-full 
+                <div class="min-w-8 min-h-8 bg-[${uuidToHexColor(fromDetails.id)}] uppercase rounded-full 
                     relative flex justify-center items-center text-white">
                     ${fromDetails.username[0]}
                     <div class="rounded-full bg-green-500 absolute bottom-0 right-0 cursor-pointer">
@@ -341,6 +366,24 @@ function _userMessageComponent(data, usersdetails) {
                     </p>
                 </div>
             </div>`
+}
+
+function _loggedUserCardComponent(data) {
+    const { id, username } = data;
+    return `<div class="min-w-12 min-h-12 bg-[${uuidToHexColor(id)}] rounded-full relative flex 
+    justify-center items-center text-2xl text-white uppercase">
+        ${username[0]}
+        <div class="w-4 h-4 rounded-full bg-green-400 absolute bottom-0 right-0 cursor-pointer">
+        </div>
+    </div>
+    <div class="w-full">
+        <p class="flex justify-between font-medium items-center text-xl">
+            #${username}
+        </p>
+        <p class="text-sm">
+            Online
+        </p>
+    </div>`
 }
 
 
