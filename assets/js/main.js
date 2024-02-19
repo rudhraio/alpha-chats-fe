@@ -141,12 +141,37 @@ function _conectToSocket() {
     // Event handler function for when a message is received
     socket.onmessage = function (event) {
         console.log('Message from server:', event.data);
+        _onSocketMessage(JSON.parse(event.data));
     };
 
     // Event handler function for when the WebSocket connection is closed
     socket.onclose = function (event) {
         console.log('WebSocket connection closed.');
     };
+}
+
+async function _onSocketMessage(data) {
+
+
+    const chatcard = document.getElementById(`user-${data.from}`) || null;
+    if (data.from === selectedItem) {
+        SelectedUserConversation.innerHTML += _userMessageComponent(data.payload.message, data.payload.chat.usersdetails);
+    }
+    if (selectedOption === "chats" && chatcard) {
+        if (data.from !== selectedItem) {
+            chatcard.getElementsByClassName("unread-dot")[0].classList.remove("hidden");
+        }
+        chatcard.getElementsByClassName("user-last-message")[0].innerHTML = data.payload.message.message;
+    }
+    console.log(selectedOption === "chats" && !chatcard);
+    console.log(selectedOption === "chats");
+    console.log(!chatcard);
+    console.log(selectedOption);
+    console.log(data.payload.chat);
+    if (selectedOption === "chats" && !chatcard) {
+        UserChatItems.innerHTML += _chatItemHtmlComponent(data.payload.chat);
+        chatsList.push(data.payload.chat);
+    }
 }
 
 async function _onChannelSelection(event) {
@@ -202,6 +227,9 @@ async function _onChatSelection(id) {
     console.log("Id", id);
     window.location.hash = `/chats/?selectedOption=${selectedOption}&selectedItem=${id}`;
 
+
+
+
     selectedItem = id;
 
     document.querySelectorAll(".user-chat-item").forEach((item) => {
@@ -209,12 +237,17 @@ async function _onChatSelection(id) {
         item.classList.add("bg-gray-100", "text-black")
     });
     const tempComponent = document.getElementById(`user-${id}`);
+    console.log("selectedOption", tempComponent.getElementsByClassName("unread-dot"));
 
     tempComponent.classList.add("bg-gray-500", "text-white")
     tempComponent.classList.remove("bg-gray-100", "text-black");
 
+    if (selectedOption === "chats") {
 
-    console.log("selectedOption", selectedOption);
+        tempComponent.getElementsByClassName("unread-dot")[0].classList.add("hidden");
+    }
+
+
 
     if (selectedOption === "members") {
         selectedItemData = memberslist.filter((item) => { return item.id === id })[0];
@@ -235,9 +268,9 @@ async function _onChatSelection(id) {
 
 async function _renderChatMessages(id) {
     const data = await _getMessagesByUserId(id);
-
+    console.log("data", data);
     let conversationInnerhtml = "";
-    data.messages.forEach((item) => {
+    data?.messages?.forEach((item) => {
         conversationInnerhtml += _userMessageComponent(item, data.usersdetails)
     });
 
@@ -249,6 +282,16 @@ async function _getMessagesByUserId(id) {
     const { data } = await apiHandler(`api/v1/chats/get/?userid=${id}`, "get");
     return data;
 }
+
+MessageBox.addEventListener('keypress', function (event) {
+
+
+    if (event.key === 'Enter') { // Check if Enter key is pressed
+        event.preventDefault(); // Prevent default newline behavior
+        _sendMessage();
+    }
+});
+
 
 async function _sendMessage() {
     const message = MessageBox.value;
@@ -299,8 +342,6 @@ function _chatItemHtmlComponent(data) {
         <div class="min-w-10 min-h-10 bg-[${uuidToHexColor(user?.id)}] rounded-full 
             relative flex justify-center items-center text-xl text-white uppercase">
             ${user?.username[0]}
-            <div class="w-3 h-3 rounded-full bg-gray-400 absolute bottom-0 right-0">
-            </div>
         </div>
         <div class="w-full">
             <p class="flex justify-between font-medium items-center">
@@ -313,10 +354,10 @@ function _chatItemHtmlComponent(data) {
                 </p>
 
             <p class="text-sm flex justify-between w-full font-medium items-center mt-1">
-                <span>
+                <span class="user-last-message">
                     ${data?.last_message}
                 </span>
-                ${loggedinuser.unread === "true" ? '<span class="flex justify-center items-center rounded-full text-xs bg-black text-white w-3 h-3"></span>' : ''}
+                <span class="unread-dot flex justify-center items-center rounded-full text-xs bg-black text-white w-3 h-3 ${loggedinuser.unread === "true" ? '' : 'hidden'}"></span>
                 
             </p>
         </div>
@@ -344,6 +385,7 @@ function _selectedUserTitleComponent(data) {
 }
 
 function _userMessageComponent(data, usersdetails) {
+    console.log("data, usersdetails", data, usersdetails);
     const { from, message, createdat, id, mtype } = data
     const fromDetails = usersdetails.filter((item) => { return item.id === from })[0];
     console.log("fromDetails", fromDetails);
