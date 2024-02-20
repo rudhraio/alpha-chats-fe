@@ -66,7 +66,6 @@ async function _joinChat() {
 }
 
 function _route(to) {
-    console.log("Called me");
     window.location.hash = to;
     _renderPage();
 }
@@ -157,18 +156,16 @@ async function _onSocketMessage(data) {
     if (data.from === selectedItem) {
         SelectedUserConversation.innerHTML += _userMessageComponent(data.payload.message, data.payload.chat.usersdetails);
     }
+
+    console.log("chatcard", chatcard);
+
     if (selectedOption === "chats" && chatcard) {
         if (data.from !== selectedItem) {
             chatcard.getElementsByClassName("unread-dot")[0].classList.remove("hidden");
         }
         chatcard.getElementsByClassName("user-last-message")[0].innerHTML = data.payload.message.message;
     }
-    console.log(selectedOption === "chats" && !chatcard);
-    console.log(selectedOption === "chats");
-    console.log(!chatcard);
-    console.log(selectedOption);
-    console.log(data.payload.chat);
-    if (selectedOption === "chats" && !chatcard) {
+    if (selectedOption === "chats" && !chatcard && data.from !== selectedItem && data.to !== userinfo.id) {
         UserChatItems.innerHTML += _chatItemHtmlComponent(data.payload.chat);
         chatsList.push(data.payload.chat);
     }
@@ -273,7 +270,11 @@ async function _renderChatMessages(id) {
     data?.messages?.forEach((item) => {
         conversationInnerhtml += _userMessageComponent(item, data.usersdetails)
     });
+    const chatcard = document.getElementById(`user-${id}`) || null;
+    if (selectedOption === "chats" && chatcard) {
 
+        chatcard.getElementsByClassName("user-last-message")[0].innerHTML = data.last_message;
+    }
     SelectedUserConversation.innerHTML = conversationInnerhtml;
 }
 
@@ -385,10 +386,8 @@ function _selectedUserTitleComponent(data) {
 }
 
 function _userMessageComponent(data, usersdetails) {
-    console.log("data, usersdetails", data, usersdetails);
     const { from, message, createdat, id, mtype } = data
     const fromDetails = usersdetails.filter((item) => { return item.id === from })[0];
-    console.log("fromDetails", fromDetails);
     return `<div class="flex items-start gap-x-3">
                 <div class="min-w-8 min-h-8 bg-[${uuidToHexColor(fromDetails.id)}] uppercase rounded-full 
                     relative flex justify-center items-center text-white">
